@@ -274,21 +274,13 @@ public class DefaultProxyTracker implements ProxyTracker {
     }
 
     private void addProxy(URI jid, InetSocketAddress address, Type type) {
-        if (type == Type.cloud) {
-            // For fallback proxies, use UDT for now
-            InetSocketAddress addressPlus1 = new InetSocketAddress(address.getAddress(), address.getPort() + 1);
-            ProxyHolder proxy = new ProxyHolder(this, peerFactory, lanternTrustStore, jid, new FiveTuple(null, addressPlus1, UDP), type);
-            proxies.add(proxy);
-            proxy.markConnected();
-        } else {
-            boolean canAddAsTCP = address != null && address.getPort() > 0
-                    && this.model.getSettings().isTcp();
-            FiveTuple fiveTuple = canAddAsTCP ? new FiveTuple(null, address, TCP) :
-                    EMPTY_UDP_TUPLE;
-            ProxyHolder proxy = new ProxyHolder(this, peerFactory,
-                    lanternTrustStore, jid, fiveTuple, type);
-            doAddProxy(jid, proxy);
-        }
+        boolean canAddAsTCP = address != null && address.getPort() > 0
+                && this.model.getSettings().isTcp();
+        FiveTuple fiveTuple = canAddAsTCP ? new FiveTuple(null, address, TCP) :
+                EMPTY_UDP_TUPLE;
+        ProxyHolder proxy = new ProxyHolder(this, peerFactory,
+                lanternTrustStore, jid, fiveTuple, type);
+        doAddProxy(jid, proxy);
     }
 
     private void doAddProxy(final URI jid, final ProxyHolder proxy) {

@@ -204,7 +204,12 @@ public final class ProxyHolder implements Comparable<ProxyHolder>,
      */
     @Override
     public InetSocketAddress getChainedProxyAddress() {
-        return fiveTuple.getRemote();
+        InetSocketAddress result = fiveTuple.getRemote();
+        if (type == Type.cloud) {
+            LOG.debug("Using UDT for fallback");
+            result = new InetSocketAddress(result.getAddress(), result.getPort() + 1);
+        }
+        return result;
     }
 
     /**
@@ -225,8 +230,12 @@ public final class ProxyHolder implements Comparable<ProxyHolder>,
      */
     @Override
     public TransportProtocol getTransportProtocol() {
-        return UDP == fiveTuple.getProtocol() ? TransportProtocol.UDT
-                : TransportProtocol.TCP;
+        if (type == Type.cloud) {
+            return TransportProtocol.UDT;
+        } else {
+            return UDP == fiveTuple.getProtocol() ? TransportProtocol.UDT
+                    : TransportProtocol.TCP;
+        }
     }
 
     /**

@@ -32,6 +32,7 @@ import com.google.inject.Singleton;
 public class GiveModeProxy extends AbstractHttpProxyServerAdapter {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
+    private Model model;
 
     @Inject
     public GiveModeProxy(
@@ -123,15 +124,21 @@ public class GiveModeProxy extends AbstractHttpProxyServerAdapter {
                                 .peerForSession(sslSession) : null;
                     }
                 }));
+        this.model = model;
         log.info("Creating give mode proxy on port {}, running as fallback: {}",
                 model.getSettings().getServerPort(),
                 LanternUtils.isFallbackProxy());
+    }
+    
+    @Override
+    public void start() {
+        super.start();
         if (LanternUtils.isFallbackProxy()) {
-            alsoListenOnUDT(model);
+            alsoListenOnUDT();
         }
     }
     
-    private void alsoListenOnUDT(Model model) {
+    private void alsoListenOnUDT() {
         int udtPort = model.getSettings().getServerPort() + 1;
         this.getServer().clone()
                 .withTransportProtocol(TransportProtocol.UDT)
