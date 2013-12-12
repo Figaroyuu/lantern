@@ -17,6 +17,7 @@ import org.littleshoot.proxy.FullFlowContext;
 import org.littleshoot.proxy.HttpFilters;
 import org.littleshoot.proxy.HttpFiltersSourceAdapter;
 import org.littleshoot.proxy.SslEngineSource;
+import org.littleshoot.proxy.TransportProtocol;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,6 +124,20 @@ public class GiveModeProxy extends AbstractHttpProxyServerAdapter {
                     }
                 }));
         log.info("Creating give mode proxy on port {}, running as fallback: {}",
+                model.getSettings().getServerPort(),
+                LanternUtils.isFallbackProxy());
+        if (LanternUtils.isFallbackProxy()) {
+            alsoListenOnUDT(model);
+        }
+    }
+    
+    private void alsoListenOnUDT(Model model) {
+        int udtPort = model.getSettings().getServerPort() + 1;
+        this.getServer().clone()
+                .withTransportProtocol(TransportProtocol.UDT)
+                .withPort(udtPort)
+                .start();
+        log.info("Added UDT on port {}",
                 model.getSettings().getServerPort(),
                 LanternUtils.isFallbackProxy());
     }
