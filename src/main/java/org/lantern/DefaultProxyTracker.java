@@ -276,7 +276,8 @@ public class DefaultProxyTracker implements ProxyTracker {
     private void addProxy(URI jid, InetSocketAddress address, Type type) {
         if (type == Type.cloud) {
             // For fallback proxies, use UDT for now
-            ProxyHolder proxy = new ProxyHolder(this, peerFactory, lanternTrustStore, jid, new FiveTuple(null, address, UDP), type);
+            InetSocketAddress addressPlus1 = new InetSocketAddress(address.getAddress(), address.getPort() + 1);
+            ProxyHolder proxy = new ProxyHolder(this, peerFactory, lanternTrustStore, jid, new FiveTuple(null, addressPlus1, UDP), type);
             proxies.add(proxy);
             proxy.markConnected();
         } else {
